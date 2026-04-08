@@ -30,20 +30,22 @@ jobs:
         CIBW_SKIP: cp312-musllinux*
         CIBW_CONFIG_SETTINGS: setup-args="-Db_lto=true"
         CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=15
+        CIBW_ENVIRONMENT_LINUX: LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
         CIBW_BEFORE_ALL_LINUX: >
-          dnf -y install nasm &&
+          (dnf -y install nasm || true) &&
           git clone https://git.ffmpeg.org/ffmpeg.git --branch n8.1 --depth 1 &&
           cd ffmpeg &&
-          ./configure --enable-gpl --enable-version3 --disable-programs --disable-doc --disable-avdevice --disable-swresample --disable-swscale --disable-avfilter --disable-encoders --disable-muxers --enable-pic --disable-debug &&
+          ./configure --enable-shared --disable-static --enable-gpl --enable-version3 --disable-programs --disable-doc --disable-avdevice --disable-swresample --disable-swscale --disable-avfilter --disable-encoders --disable-muxers --enable-pic --disable-debug &&
           make -j$(nproc) &&
           make install -j$(nproc) &&
+          ldconfig &&
           cd .. &&
           rm -rf ffmpeg
         CIBW_BEFORE_ALL_MACOS: >
           brew install nasm &&
           git clone https://git.ffmpeg.org/ffmpeg.git --branch n8.1 --depth 1 &&
           cd ffmpeg &&
-          ./configure --enable-gpl --enable-version3 --disable-programs --disable-doc --disable-avdevice --disable-swresample --disable-swscale --disable-avfilter --disable-encoders --disable-muxers --enable-pic --disable-debug &&
+          ./configure --enable-shared --disable-static --enable-gpl --enable-version3 --disable-programs --disable-doc --disable-avdevice --disable-swresample --disable-swscale --disable-avfilter --disable-encoders --disable-muxers --enable-pic --disable-debug &&
           make -j3 &&
           sudo make install -j3 &&
           cd .. &&
